@@ -102,7 +102,7 @@ baseQuery = {
         }
         
         if (opts.formatData) {
-            jsonResult = opts.formatData(jsonResult);
+            jsonResult = opts.formatData(jsonResult, results);
         }
         
         if (typeof opts.response === 'function') {
@@ -136,7 +136,7 @@ baseQuery = {
         options = {};
         options.success = opts.success || this._defaultSuccess.bind(null, opts);
         
-        if (opts.error) options.error = error;
+        if (opts.error) options.error = opts.error;
         
         opts.mssql.query(this.sql, this.params, options);
     }
