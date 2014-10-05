@@ -36,6 +36,8 @@ customAuthenticator = {
             settings.zumoSettings.ver && (this.zumoSettings.ver = settings.zumoSettings.ver);
         }
         
+        settings.expirySecondsSpan && (this.expirySecondsSpan = settings.expirySecondsSpan);
+        
         return this;
     },
     
