@@ -143,19 +143,27 @@ exports.PushNotificator = {
     sendAndroidNotification: function (title, message, data, callback) {
         var totalTags = this.tags.length,
             tagsSent = 0,
-            results = [];
+            internalData = {},
+            results = [], key;
         
-        data = (data && Object.create(data)) || {};
-        data.title = title;
-        data.message = message;
+        if (data) {
+            for (key in data) {
+                if (!data.hasOwnProperty(key)) continue;
+                
+                internalData[key] = data[key];
+            }
+        }
+
+        internalData.title = title;
+        internalData.message = message;
         
         if (!totalTags) {
-            this._sendAndroidNotification(null, data, callback);
+            this._sendAndroidNotification(null, internalData, callback);
             return;
         }
         
         this.tags.forEach(function (tag) {
-            this._sendAndroidNotification(tag, data, function (error, result) {
+            this._sendAndroidNotification(tag, internalData, function (error, result) {
                 if (!callback) return;
 
                 tagsSent += 1;
