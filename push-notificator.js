@@ -31,7 +31,7 @@
         
  *
  */
-var debug = false;
+var debug = true;
  
 exports.createPushNotificator = function (settings) {
     return exports.PushNotificator.create(settings);
@@ -95,28 +95,35 @@ exports.PushNotificator = {
     },
     
     sendIosNotification: function (title, message, data, callback) {
-        var alertMessage,
+        var alertMessage, key,
             truncatedSuffix = '...',
             totalTags = this.tags.length,
             tagsSent = 0,
-            results = [];
+            results = [],
+            internalData = {};
         
         title = this._truncateText(title.trim(), this.maxTitleLength, truncatedSuffix);
         message = this._truncateText(message.trim(), this.maxMessageLength, truncatedSuffix);
         
         alertMessage = (title && (title + ' - ')) + message;
         
-        data = (data && Object.create(data)) || {};
+        if (data) {
+            for (key in data) {
+                if (!data.hasOwnProperty(key)) continue;
+                
+                internalData[key] = data[key];
+            }
+        }
         
-        data.alert = alertMessage;
+        internalData.alert = alertMessage;
     
         if (!totalTags) {
-            this._sendIosNotification(null, data, callback);
+            this._sendIosNotification(null, internalData, callback);
             return;
         }
         
         this.tags.forEach(function (tag) {
-            this._sendIosNotification(tag, data, function (error, result) {
+            this._sendIosNotification(tag, internalData, function (error, result) {
                 if (!callback) return;
 
                 tagsSent += 1;
