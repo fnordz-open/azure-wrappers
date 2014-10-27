@@ -78,7 +78,9 @@
         error
  */
 
-var baseQuery,
+var debug = true,
+    
+    baseQuery,
     queryInsert,
     queryDelete,
     queryProcedure;
@@ -232,7 +234,7 @@ queryDelete = {
         query.scheme = schemeName;
         query.table = tableName;
         
-        if (params) query._buildSql(params);
+        query._buildSql(params);
         
         return query;
     },
@@ -242,10 +244,16 @@ queryDelete = {
         
         this.sql = [
             'DELETE FROM',
-            (((this.scheme && (this.scheme) + '.') || '') + this.table),
-            'WHERE', 
-            paramsPlaceholders
+            (((this.scheme && (this.scheme) + '.') || '') + this.table)
         ].join(' ');
+        
+        if (paramsPlaceholders) {
+            this.sql = [
+                this.sql,
+                'WHERE', 
+                paramsPlaceholders
+            ].join(' ');
+        }
         
         return this.sql;
     },
@@ -306,7 +314,7 @@ queryProcedure = {
         query.scheme = schemeName;
         query.procedure = procedureName;
         
-        if (params) query._buildSql(params);
+        query._buildSql(params);
         
         return query;
     },
@@ -350,6 +358,12 @@ queryProcedure = {
             //== para verificar null ou undefined
             //filtra também funções
             if ((paramValue == null) || (typeof paramValue === 'function')) continue;
+            
+            //escape para por SQL como valor, ao invés de um placeholder
+            if (key[0] === '@') {
+                sqlParams.push(key + '=' + paramValue);
+                continue;
+            }
             
             sqlParams.push('@' + key + '=?');
             paramList.push(paramValue);
