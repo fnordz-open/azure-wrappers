@@ -122,17 +122,19 @@ baseQuery = {
     },
     
     //opts keys:
-    //  mssql    [required]
+    //  mssql    [required if not setted]
     //  response [required for default execution]
     //  success
     //  additionalData [only for default execution]
     //  error
     exec: function (opts) {
-        var options;
+        var options, mssql;
 
-        if (!opts.mssql) throw new Error('exec(): precisa de mssql para executar');
-        if (!opts.response && !opts.success) throw new Error('exec(): precisa de response ou um callback para executar');
-        if (opts.success && opts.additionalData) console.warning('exec(): additionalData não é usada quando o callback success é passado');
+        mssql = opts.mssql || this.mssql;
+        
+        if (!mssql) throw new Error('exec(): needs reference to mssql');
+        if (!opts.response && !opts.success) throw new Error('exec(): needs "response" or a callback "success"');
+        if (opts.success && opts.additionalData) console.warning('exec(): additionalData can\'t be used with a callback');
 
         //defining the callbacks
         options = {};
@@ -140,7 +142,7 @@ baseQuery = {
         
         if (opts.error) options.error = opts.error;
         
-        opts.mssql.query(this.sql, this.params, options);
+        mssql.query(this.sql, this.params, options);
     }
 };
     
@@ -152,12 +154,12 @@ queryInsert = {
     item: null,
     params: null,
     
-    create: function (schemeName, tableName, item) {
+    create: function (schemeName, tableName, mssql, item) {
         var query = Object.create(queryInsert);
         
         query.scheme = schemeName;
         query.table = tableName;
-        
+        query.mssql = mssql;
         if (item) query._buildSql(item);
         
         return query;
@@ -228,12 +230,12 @@ queryDelete = {
     sql: null,
     params: null,
     
-    create: function (schemeName, tableName, params) {
+    create: function (schemeName, tableName, mssql, params) {
         var query = Object.create(queryDelete);
         
         query.scheme = schemeName;
         query.table = tableName;
-        
+        query.mssql = mssql;
         query._buildSql(params);
         
         return query;
@@ -308,12 +310,12 @@ queryProcedure = {
     sql: null,
     params: null,
     
-    create: function (schemeName, procedureName, params) {
+    create: function (schemeName, procedureName, mssql, params) {
         var query = Object.create(queryProcedure);
 
         query.scheme = schemeName;
         query.procedure = procedureName;
-        
+        query.mssql = mssql;
         query._buildSql(params);
         
         return query;
@@ -381,18 +383,18 @@ exports.QueryBuilder = {
     createQueryInsert: function (opts) {
         opts || (opts = {});
 
-        return queryInsert.create(opts.scheme, opts.table, opts.item);
+        return queryInsert.create(opts.scheme, opts.table, opts.mssql, opts.item);
     },
     
     createQueryDelete: function (opts) {
         opts || (opts = {});
 
-        return queryDelete.create(opts.scheme, opts.table, opts.where);
+        return queryDelete.create(opts.scheme, opts.table, opts.mssql, opts.where);
     },
     
     createQueryProcedure: function (opts) {
         opts || (opts = {});
 
-        return queryProcedure.create(opts.scheme, opts.procedure, opts.params);
+        return queryProcedure.create(opts.scheme, opts.procedure, opts.mssql, opts.params);
     }
 };
