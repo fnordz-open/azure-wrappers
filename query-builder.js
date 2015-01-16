@@ -196,9 +196,8 @@ queryInsert = {
         for (key in params) {
             paramValue = params[key];
             
-            //== para verificar null ou undefined
             //filtra também funções
-            if ((paramValue == null) || (typeof paramValue === 'function')) continue;
+            if ((paramValue === undefined) || (typeof paramValue === 'function')) continue;
             
             //escape para por SQL como valor, ao invés de um placeholder
             if (key[0] === '@') {
@@ -273,15 +272,19 @@ queryDelete = {
             paramValue = params[key];
             paramType = typeof paramValue;
             
-            //== para verificar null ou undefined
             //filtra também funções
-            if ((paramValue == null) || (paramType === 'function')) continue;
+            if ((paramValue === undefined) || (paramType === 'function')) continue;
             
-            if (paramType === 'object') {
-                op = paramValue.op;
-                paramValue = paramValue.value;
+            if (paramValue === null) {
+                op = 'is';
+                paramValue = null;
             } else {
-                op = '=';
+                if (paramType === 'object') {
+                    op = paramValue.op;
+                    paramValue = paramValue.value;
+                } else {
+                    op = '=';
+                }
             }
             
             //SQL inline
@@ -359,7 +362,7 @@ queryProcedure = {
             
             //== para verificar null ou undefined
             //filtra também funções
-            if ((paramValue == null) || (typeof paramValue === 'function')) continue;
+            if ((paramValue === undefined) || (typeof paramValue === 'function')) continue;
             
             //escape para por SQL como valor, ao invés de um placeholder
             if (key[0] === '@') {

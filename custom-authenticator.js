@@ -17,12 +17,21 @@ customAuthenticator = {
         ver: 2,
     },
     
-    expirySecondsSpan: 20 * 60, //minutes
+    expirySecondsSpan: 20 * 60, //20 minutes
     
     masterKey: null,
     
     cryptoModule: null,
     
+    //settings:
+    //      masterKey
+    //          can be obtained: tables - require('mobileservice-config').masterKey
+    //                           api    - request.service.config.masterKey
+    //      zumoSettings object(optional)
+    //          properties: aud, iss, ver
+    //
+    //      expirySecondsSpan (options)
+    //          how many seconds the user token will valid
     init: function (settings) {
         this.cryptoModule = require('crypto');
 
@@ -65,10 +74,10 @@ customAuthenticator = {
         );
     },
     
+    //generateAuth(password, [salt,] callback);
     //password <plain text password>
     //callback params: {password: ..., salt: ...}
-    //opcionalmente pode ser passado um salt fixo para aumentar a segurança e 
-    //evitar que o salt aleatório seja gerado
+    //optionally a salt can be passed to avoid the generation of a random one by the function
     generateAuth: function (password, salt, callback) {
         if (typeof salt === 'function') {
             callback = salt;
