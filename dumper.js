@@ -76,11 +76,10 @@ exports.varDump = (function () {
         return ret;
     }
     
-    function _formatArray(obj, cur_depth, options) {
+    function _formatArray(obj, cur_depth, options, alreadyRecursed) {
         var someProp = '',
             base_pad,
             thick_pad,
-            alreadyRecursed = [],
             str = '',
             val = '', 
             lgth = 0, key, objVal, isArray, 
@@ -130,7 +129,7 @@ exports.varDump = (function () {
                 objVal = obj[key];
                 if (typeof objVal === 'object' && objVal !== null && !(objVal instanceof Date) && !(objVal instanceof RegExp)) {
                   str += (
-                    thick_pad + (isArray ? '[' : '') + key + (isArray ? ']' : '') + ': ' + _formatArray(objVal, cur_depth + 1, options));
+                    thick_pad + (isArray ? '[' : '') + key + (isArray ? ']' : '') + ': ' + _formatArray(objVal, cur_depth + 1, options, alreadyRecursed));
                 } else {
                   val = _getInnerVal(objVal, thick_pad, options);
                   str += thick_pad + (isArray ? '[' : '') + key + (isArray ? ']' : '') + ': ' + val + '\n';
@@ -176,7 +175,7 @@ exports.varDump = (function () {
         if (typeof options.paddingSize !== 'number') options.paddingSize = 2;
         
         
-        output = message + _formatArray(obj, 0, options);
+        output = message + _formatArray(obj, 0, options, []);
 
         if (console && console.log) {
             if (options.splitOnTruncate) {
@@ -192,4 +191,3 @@ exports.varDump = (function () {
         return output;
     };
 }());
-
